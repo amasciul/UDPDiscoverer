@@ -47,7 +47,7 @@ public class Discoverer {
         return this;
     }
 
-    public synchronized void broadcast() {
+    public void broadcast() {
         if (localPort == -1) {
             error(new IllegalArgumentException("Local port not set"));
             return;
