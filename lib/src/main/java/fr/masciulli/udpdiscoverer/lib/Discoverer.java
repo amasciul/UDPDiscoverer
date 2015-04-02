@@ -3,11 +3,13 @@ package fr.masciulli.udpdiscoverer.lib;
 import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 
 public class Discoverer {
 
@@ -45,7 +47,7 @@ public class Discoverer {
         return this;
     }
 
-    public void broadcast() {
+    public synchronized void broadcast() {
         if (localPort == -1) {
             error(new IllegalArgumentException("Local port not set"));
             return;
@@ -61,20 +63,11 @@ public class Discoverer {
             return;
         }
 
-        DatagramSocket socket = null;
         try {
             InetAddress address = getBroadcastAddress();
-            socket = new DatagramSocket(localPort);
-            socket.setBroadcast(true);
-            DatagramPacket packet = new DatagramPacket(data, data.length, address, remotePort);
-            socket.send(packet);
-            callback.success();
+            new BroadcastTask(address, localPort, remotePort).execute(data);
         } catch (IOException exception) {
             error(exception);
-        } finally {
-            if (socket != null) {
-                socket.close();
-            }
         }
     }
 
@@ -99,5 +92,46 @@ public class Discoverer {
         }
     }
 
+    private class BroadcastTask extends AsyncTask<byte[], Void, Void> {
+        private final InetAddress address;
+        private final int localPort;
+        private final int remotePort;
+        private Exception exception;
+
+        public BroadcastTask(InetAddress address, int localPort, int remotePort) {
+            this.address = address;
+            this.localPort = localPort;
+            this.remotePort = remotePort;
+        }
+
+        @Override
+        protected Void doInBackground(byte[]... params) {
+            DatagramSocket socket = null;
+            try {
+                socket = new DatagramSocket(localPort);
+                socket.setBroadcast(true);
+                DatagramPacket packet = new DatagramPacket(data, data.length, address, remotePort);
+                socket.send(packet);
+            } catch (IOException exception) {
+                this.exception = exception;
+                cancel(true);
+            } finally {
+                if (socket != null) {
+                    socket.close();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onCancelled() {
+            callback.error(this.exception);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            callback.success();
+        }
+    }
 
 }
