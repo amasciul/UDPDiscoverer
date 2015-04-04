@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">UDP discoverer</string>
+    <string name="send">Send</string>
+    <string name="message">Type your message</string>
+    <string name="message_sent">Message sent !</string>
+    <string name="message_notsent">Error sending message</string>
 </resources>
