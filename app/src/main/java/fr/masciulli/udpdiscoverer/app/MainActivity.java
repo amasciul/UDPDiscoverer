@@ -14,11 +14,11 @@ import fr.masciulli.udpdiscoverer.lib.Discoverer;
 
 public class MainActivity extends Activity implements Callback {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final int LOCAL_PORT = 8887;
-    private static final int REMOTE_PORT = 8888;
 
     private Button sendButton;
     private EditText messageField;
+    private EditText localPortField;
+    private EditText remotePortField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,19 +27,28 @@ public class MainActivity extends Activity implements Callback {
         setContentView(R.layout.activity_main);
         sendButton = (Button) findViewById(R.id.send);
         messageField = (EditText) findViewById(R.id.message);
+        localPortField = (EditText) findViewById(R.id.local_port);
+        remotePortField = (EditText) findViewById(R.id.remote_port);
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage(messageField.getText().toString());
+                String message = messageField.getText().toString();
+                try {
+                    int localPort = Integer.parseInt(localPortField.getText().toString());
+                    int remotePort = Integer.parseInt(remotePortField.getText().toString());
+                    sendMessage(message, localPort, remotePort);
+                } catch (NumberFormatException exception) {
+                    Toast.makeText(MainActivity.this, getString(R.string.port_format_error), Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
-    private void sendMessage(String message) {
+    private void sendMessage(String message, int localPort, int remotePort) {
         Discoverer.from(MainActivity.this)
-                .localPort(LOCAL_PORT)
-                .remotePort(REMOTE_PORT)
+                .localPort(localPort)
+                .remotePort(remotePort)
                 .data(message.getBytes())
                 .callback(this)
                 .broadcast();

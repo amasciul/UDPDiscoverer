@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">UDP discoverer</string>
     <string name="send">Send</string>
-    <string name="message">Type your message</string>
+    <string name="message">Message</string>
     <string name="message_sent">Message sent !</string>
     <string name="message_notsent">Error sending message</string>
+    <string name="local_port">Local port</string>
+    <string name="remote_port">Remote port</string>
+    <string name="port_format_error">Local or remote port not correctly filled</string>
 </resources>
