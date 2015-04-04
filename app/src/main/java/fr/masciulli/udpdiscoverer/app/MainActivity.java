@@ -30,15 +30,6 @@ public class MainActivity extends ActionBarActivity implements Callback {
         remotePortField = (EditText) findViewById(R.id.remote_port);
     }
 
-    private void sendMessage(String message, int localPort, int remotePort) {
-        Discoverer.from(MainActivity.this)
-                .localPort(localPort)
-                .remotePort(remotePort)
-                .data(message.getBytes())
-                .callback(this)
-                .broadcast();
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -71,5 +62,14 @@ public class MainActivity extends ActionBarActivity implements Callback {
     @Override
     public void messageSent() {
         Toast.makeText(this, getString(R.string.message_sent), Toast.LENGTH_SHORT).show();
+    }
+
+    private void sendMessage(String message, int localPort, int remotePort) {
+        Discoverer.from(MainActivity.this)
+                .localPort(localPort)
+                .remotePort(remotePort)
+                .data(message.getBytes())
+                .callback(this)
+                .broadcast();
     }
 }
