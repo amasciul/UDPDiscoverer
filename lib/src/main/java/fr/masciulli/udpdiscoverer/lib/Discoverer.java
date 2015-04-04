@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -16,6 +17,7 @@ public class Discoverer {
     private final Context context;
     private int localPort = -1;
     private int remotePort = -1;
+    @Nullable
     private Callback callback;
     private byte[] data;
 
@@ -65,7 +67,7 @@ public class Discoverer {
 
         try {
             InetAddress address = getBroadcastAddress();
-            new BroadcastTask(address, localPort, remotePort).execute(data);
+            new BroadcastTask(address, localPort, remotePort, callback).execute(data);
         } catch (IOException exception) {
             error(exception);
         }
@@ -89,48 +91,6 @@ public class Discoverer {
     private void error(Exception exception) {
         if (callback != null) {
             callback.error(exception);
-        }
-    }
-
-    private class BroadcastTask extends AsyncTask<byte[], Void, Void> {
-        private final InetAddress address;
-        private final int localPort;
-        private final int remotePort;
-        private Exception exception;
-
-        public BroadcastTask(InetAddress address, int localPort, int remotePort) {
-            this.address = address;
-            this.localPort = localPort;
-            this.remotePort = remotePort;
-        }
-
-        @Override
-        protected Void doInBackground(byte[]... params) {
-            DatagramSocket socket = null;
-            try {
-                socket = new DatagramSocket(localPort);
-                socket.setBroadcast(true);
-                DatagramPacket packet = new DatagramPacket(data, data.length, address, remotePort);
-                socket.send(packet);
-            } catch (IOException exception) {
-                this.exception = exception;
-                cancel(true);
-            } finally {
-                if (socket != null) {
-                    socket.close();
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onCancelled() {
-            callback.error(this.exception);
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            callback.success();
         }
     }
 
