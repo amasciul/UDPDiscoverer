@@ -1,8 +1,7 @@
 package fr.masciulli.udpdiscoverer.app;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.text.Editable;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -12,7 +11,7 @@ import android.widget.Toast;
 import fr.masciulli.udpdiscoverer.lib.Callback;
 import fr.masciulli.udpdiscoverer.lib.Discoverer;
 
-public class MainActivity extends Activity implements Callback {
+public class MainActivity extends ActionBarActivity implements Callback {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private Button sendButton;
