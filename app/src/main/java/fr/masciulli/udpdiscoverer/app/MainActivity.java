@@ -69,7 +69,7 @@ public class MainActivity extends ActionBarActivity implements Callback {
     }
 
     @Override
-    public void success() {
+    public void messageSent() {
         Toast.makeText(this, getString(R.string.message_sent), Toast.LENGTH_SHORT).show();
     }
 }

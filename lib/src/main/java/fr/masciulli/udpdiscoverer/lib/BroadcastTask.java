@@ -54,7 +54,7 @@ class BroadcastTask extends AsyncTask<byte[], Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         if (callback != null) {
-            callback.success();
+            callback.messageSent();
         }
     }
 }
