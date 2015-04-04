@@ -9,15 +9,15 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 class BroadcastTask extends AsyncTask<byte[], Void, Void> {
+    private final DatagramSocket socket;
     private final InetAddress address;
-    private final int localPort;
     private final int remotePort;
     private final Callback callback;
     private Exception exception;
 
-    public BroadcastTask(InetAddress address, int localPort, int remotePort, @Nullable Callback callback) {
+    public BroadcastTask(DatagramSocket socket, InetAddress address, int remotePort, @Nullable Callback callback) {
+        this.socket = socket;
         this.address = address;
-        this.localPort = localPort;
         this.remotePort = remotePort;
         this.callback = callback;
     }
@@ -27,19 +27,13 @@ class BroadcastTask extends AsyncTask<byte[], Void, Void> {
         if (data.length == 0) {
             return null;
         }
-        DatagramSocket socket = null;
+
         try {
-            socket = new DatagramSocket(localPort);
-            socket.setBroadcast(true);
             DatagramPacket packet = new DatagramPacket(data[0], data[0].length, address, remotePort);
             socket.send(packet);
         } catch (IOException exception) {
             this.exception = exception;
             cancel(true);
-        } finally {
-            if (socket != null) {
-                socket.close();
-            }
         }
         return null;
     }
@@ -47,6 +41,7 @@ class BroadcastTask extends AsyncTask<byte[], Void, Void> {
     @Override
     protected void onCancelled() {
         if (callback != null) {
+            socket.close();
             callback.error(this.exception);
         }
     }
@@ -54,6 +49,7 @@ class BroadcastTask extends AsyncTask<byte[], Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         if (callback != null) {
+            socket.close();
             callback.messageSent();
         }
     }

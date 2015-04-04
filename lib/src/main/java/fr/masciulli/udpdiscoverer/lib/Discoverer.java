@@ -67,7 +67,9 @@ public class Discoverer {
 
         try {
             InetAddress address = getBroadcastAddress();
-            new BroadcastTask(address, localPort, remotePort, callback).execute(data);
+            DatagramSocket socket = new DatagramSocket(localPort);
+            socket.setBroadcast(true);
+            new BroadcastTask(socket, address, remotePort, callback).execute(data);
         } catch (IOException exception) {
             error(exception);
         }
