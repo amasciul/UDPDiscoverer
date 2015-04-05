@@ -12,10 +12,11 @@ class BroadcastTask extends AsyncTask<byte[], Void, Void> {
     private final DatagramSocket socket;
     private final InetAddress address;
     private final int remotePort;
+    @Nullable
     private final Callback callback;
     private Exception exception;
 
-    public BroadcastTask(DatagramSocket socket, InetAddress address, int remotePort, Callback callback) {
+    public BroadcastTask(DatagramSocket socket, InetAddress address, int remotePort, @Nullable Callback callback) {
         this.socket = socket;
         this.address = address;
         this.remotePort = remotePort;
