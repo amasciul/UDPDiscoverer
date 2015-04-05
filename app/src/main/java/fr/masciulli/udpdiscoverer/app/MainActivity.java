@@ -68,7 +68,7 @@ public class MainActivity extends ActionBarActivity implements Callback {
 
     @Override
     public void responseReceived(DatagramPacket response) {
-        Toast.makeText(this, "message received", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.message_received, new String(response.getData())), Toast.LENGTH_SHORT).show();
     }
 
     private void sendMessage(String message, int localPort, int remotePort) {

@@ -15,7 +15,7 @@ class BroadcastTask extends AsyncTask<byte[], Void, Void> {
     private final Callback callback;
     private Exception exception;
 
-    public BroadcastTask(DatagramSocket socket, InetAddress address, int remotePort, @Nullable Callback callback) {
+    public BroadcastTask(DatagramSocket socket, InetAddress address, int remotePort, Callback callback) {
         this.socket = socket;
         this.address = address;
         this.remotePort = remotePort;
@@ -42,14 +42,13 @@ class BroadcastTask extends AsyncTask<byte[], Void, Void> {
     protected void onCancelled() {
         if (callback != null) {
             socket.close();
-            callback.error(this.exception);
+            callback.error(exception);
         }
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
         if (callback != null) {
-            socket.close();
             callback.messageSent();
         }
     }

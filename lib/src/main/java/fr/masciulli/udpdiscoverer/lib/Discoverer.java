@@ -67,11 +67,34 @@ public class Discoverer {
 
         try {
             InetAddress address = getBroadcastAddress();
-            DatagramSocket socket = new DatagramSocket(localPort);
+            final DatagramSocket socket = new DatagramSocket(localPort);
             socket.setBroadcast(true);
 
-            new ListenTask(socket, callback).execute();
-            new BroadcastTask(socket, address, remotePort, callback).execute(data);
+            Callback broadcastCallback = new Callback() {
+                @Override
+                public void error(Exception exception) {
+                    if (callback != null) {
+                        callback.error(exception);
+                    }
+                }
+
+                @Override
+                public void messageSent() {
+                    if (callback != null) {
+                        callback.messageSent();
+                    }
+                    new ListenTask(socket, callback).execute();
+                }
+
+                @Override
+                public void responseReceived(DatagramPacket response) {
+                    if (callback != null) {
+                        callback.responseReceived(response);
+                    }
+                }
+            };
+
+            new BroadcastTask(socket, address, remotePort, broadcastCallback).execute(data);
         } catch (IOException exception) {
             error(exception);
         }

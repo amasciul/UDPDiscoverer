@@ -7,4 +7,5 @@
     <string name="local_port">Local port</string>
     <string name="remote_port">Remote port</string>
     <string name="port_format_error">Local or remote port not correctly filled</string>
+    <string name="message_received">Message received : %1$s</string>
 </resources>
