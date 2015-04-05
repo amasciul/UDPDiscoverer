@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-public class ListenTask extends AsyncTask<byte[], Void, DatagramPacket> {
+public class ListenTask extends AsyncTask<byte[], DatagramPacket, Void> {
     private final DatagramSocket socket;
     @Nullable
     private final Callback callback;
@@ -19,25 +19,29 @@ public class ListenTask extends AsyncTask<byte[], Void, DatagramPacket> {
     }
 
     @Override
-    protected DatagramPacket doInBackground(byte[]... params) {
+    protected Void doInBackground(byte[]... params) {
         byte[] buffer = new byte[1024];
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-        try {
-            socket.receive(packet);
-            return packet;
-        } catch (IOException exception) {
-            this.exception = exception;
-            cancel(true);
-        } finally {
-            socket.close();
+
+        while (!isCancelled()) {
+            try {
+                socket.receive(packet);
+                publishProgress(packet);
+            } catch (IOException exception) {
+                this.exception = exception;
+                cancel(true);
+            }
         }
+        socket.close();
         return null;
     }
 
     @Override
-    protected void onPostExecute(DatagramPacket packet) {
+    protected void onProgressUpdate(DatagramPacket... packets) {
         if (callback != null) {
-            callback.responseReceived(packet);
+            for (DatagramPacket packet : packets) {
+                callback.responseReceived(packet);
+            }
         }
     }
 
