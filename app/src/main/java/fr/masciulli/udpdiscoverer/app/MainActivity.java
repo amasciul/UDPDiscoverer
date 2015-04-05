@@ -10,6 +10,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.net.DatagramPacket;
+
 import fr.masciulli.udpdiscoverer.lib.Callback;
 import fr.masciulli.udpdiscoverer.lib.Discoverer;
 
@@ -62,6 +64,11 @@ public class MainActivity extends ActionBarActivity implements Callback {
     @Override
     public void messageSent() {
         Toast.makeText(this, getString(R.string.message_sent), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void responseReceived(DatagramPacket response) {
+        Toast.makeText(this, "message received", Toast.LENGTH_SHORT).show();
     }
 
     private void sendMessage(String message, int localPort, int remotePort) {
