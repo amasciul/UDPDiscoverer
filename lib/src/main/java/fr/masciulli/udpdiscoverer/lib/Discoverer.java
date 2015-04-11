@@ -12,12 +12,17 @@ import java.net.InetAddress;
 
 public class Discoverer {
 
+    private static final int STATE_IDLE = 0;
+    private static final int STATE_BROADCASTING = 0;
+    private static final int STATE_LISTENING = 0;
+
     private final Context context;
     private int localPort = -1;
     private int remotePort = -1;
     @Nullable
     private Callback callback;
     private byte[] data;
+    private int currentState = STATE_IDLE;
 
     public Discoverer(Context context) {
         this.context = context;
@@ -71,31 +76,39 @@ public class Discoverer {
             Callback broadcastCallback = new Callback() {
                 @Override
                 public void error(Exception exception) {
-                    if (callback != null) {
-                        callback.error(exception);
-                    }
+                    Discoverer.this.error(exception);
                 }
 
                 @Override
                 public void messageSent() {
-                    if (callback != null) {
-                        callback.messageSent();
-                    }
+                    Discoverer.this.messageSent();
+                    currentState = STATE_LISTENING;
                     new ListenTask(socket, callback).execute();
                 }
 
                 @Override
                 public void responseReceived(DatagramPacket response) {
-                    if (callback != null) {
-                        callback.responseReceived(response);
-                    }
+                    Discoverer.this.responseReceived(response);
                 }
             };
 
+            currentState = STATE_BROADCASTING;
             new BroadcastTask(socket, address, remotePort, broadcastCallback).execute(data);
         } catch (IOException exception) {
             error(exception);
         }
+    }
+
+    public boolean isIdle() {
+        return currentState == STATE_IDLE;
+    }
+
+    public boolean isBroadcasting() {
+        return currentState == STATE_BROADCASTING;
+    }
+
+    public boolean isListening() {
+        return currentState == STATE_LISTENING;
     }
 
     private InetAddress getBroadcastAddress() throws IOException {
@@ -117,6 +130,18 @@ public class Discoverer {
         if (callback != null) {
             callback.error(exception);
         }
+        currentState = STATE_IDLE;
     }
 
+    private void messageSent() {
+        if (callback != null) {
+            callback.messageSent();
+        }
+    }
+
+    private void responseReceived(DatagramPacket response) {
+        if (callback != null) {
+            callback.responseReceived(response);
+        }
+    }
 }
