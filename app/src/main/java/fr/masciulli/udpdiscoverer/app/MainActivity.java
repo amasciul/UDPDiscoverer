@@ -1,6 +1,7 @@
 package fr.masciulli.udpdiscoverer.app;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -21,6 +22,8 @@ public class MainActivity extends ActionBarActivity implements Callback {
     private EditText messageField;
     private EditText localPortField;
     private EditText remotePortField;
+    @Nullable
+    private Discoverer discoverer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,18 +44,23 @@ public class MainActivity extends ActionBarActivity implements Callback {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_send) {
-            String message = messageField.getText().toString();
-            try {
-                int localPort = Integer.parseInt(localPortField.getText().toString());
-                int remotePort = Integer.parseInt(remotePortField.getText().toString());
-                sendMessage(message, localPort, remotePort);
-            } catch (NumberFormatException exception) {
-                Toast.makeText(MainActivity.this, getString(R.string.port_format_error), Toast.LENGTH_SHORT).show();
-            }
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_send:
+                String message = messageField.getText().toString();
+                try {
+                    int localPort = Integer.parseInt(localPortField.getText().toString());
+                    int remotePort = Integer.parseInt(remotePortField.getText().toString());
+                    sendMessage(message, localPort, remotePort);
+                } catch (NumberFormatException exception) {
+                    Toast.makeText(MainActivity.this, getString(R.string.port_format_error), Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            case R.id.action_stop:
+                stopListening();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -72,11 +80,17 @@ public class MainActivity extends ActionBarActivity implements Callback {
     }
 
     private void sendMessage(String message, int localPort, int remotePort) {
-        Discoverer.from(MainActivity.this)
+        discoverer = Discoverer.from(this)
                 .localPort(localPort)
                 .remotePort(remotePort)
                 .data(message.getBytes())
-                .callback(this)
-                .broadcast();
+                .callback(this);
+        discoverer.broadcast();
+    }
+
+    private void stopListening() {
+        if (discoverer != null) {
+            discoverer.stop();
+        }
     }
 }

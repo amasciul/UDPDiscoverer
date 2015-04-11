@@ -3,6 +3,7 @@ package fr.masciulli.udpdiscoverer.lib;
 import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 
 import java.io.IOException;
@@ -23,6 +24,8 @@ public class Discoverer {
     private Callback callback;
     private byte[] data;
     private int currentState = STATE_IDLE;
+    @Nullable
+    private AsyncTask currentTask;
 
     public Discoverer(Context context) {
         this.context = context;
@@ -83,7 +86,7 @@ public class Discoverer {
                 public void messageSent() {
                     Discoverer.this.messageSent();
                     currentState = STATE_LISTENING;
-                    new ListenTask(socket, callback).execute();
+                    currentTask = new ListenTask(socket, callback).execute();
                 }
 
                 @Override
@@ -93,7 +96,7 @@ public class Discoverer {
             };
 
             currentState = STATE_BROADCASTING;
-            new BroadcastTask(socket, address, remotePort, broadcastCallback).execute(data);
+            currentTask = new BroadcastTask(socket, address, remotePort, broadcastCallback).execute(data);
         } catch (IOException exception) {
             error(exception);
         }
@@ -109,6 +112,13 @@ public class Discoverer {
 
     public boolean isListening() {
         return currentState == STATE_LISTENING;
+    }
+
+    public void stop() {
+        if (currentTask != null) {
+            currentTask.cancel(true);
+            currentState = STATE_IDLE;
+        }
     }
 
     private InetAddress getBroadcastAddress() throws IOException {
