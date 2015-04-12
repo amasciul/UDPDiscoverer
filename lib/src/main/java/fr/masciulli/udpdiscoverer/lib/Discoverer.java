@@ -14,8 +14,8 @@ import java.net.InetAddress;
 public class Discoverer {
 
     private static final int STATE_IDLE = 0;
-    private static final int STATE_BROADCASTING = 0;
-    private static final int STATE_LISTENING = 0;
+    private static final int STATE_BROADCASTING = 1;
+    private static final int STATE_LISTENING = 2;
 
     private final Context context;
     private int localPort = -1;
