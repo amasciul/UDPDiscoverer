@@ -9,4 +9,7 @@
     <string name="port_format_error">Local or remote port not correctly filled</string>
     <string name="message_received">Message received : %1$s</string>
     <string name="stop">Stop</string>
+    <string name="idle">Idle</string>
+    <string name="broadcasting">Broadcasting</string>
+    <string name="listening">Listening</string>
 </resources>

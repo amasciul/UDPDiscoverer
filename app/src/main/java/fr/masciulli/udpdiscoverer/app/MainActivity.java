@@ -1,14 +1,15 @@
 package fr.masciulli.udpdiscoverer.app;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.DatagramPacket;
@@ -18,7 +19,9 @@ import fr.masciulli.udpdiscoverer.lib.Discoverer;
 
 public class MainActivity extends ActionBarActivity implements Callback {
     private static final String TAG = MainActivity.class.getSimpleName();
+    private static final long UPDATE_PERIOD = 500;
 
+    private TextView stateTextView;
     private EditText messageField;
     private EditText localPortField;
     private EditText remotePortField;
@@ -30,9 +33,20 @@ public class MainActivity extends ActionBarActivity implements Callback {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+        stateTextView = (TextView) findViewById(R.id.state);
         messageField = (EditText) findViewById(R.id.message);
         localPortField = (EditText) findViewById(R.id.local_port);
         remotePortField = (EditText) findViewById(R.id.remote_port);
+
+        updateState();
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateState();
+                handler.postDelayed(this, UPDATE_PERIOD);
+            }
+        }, UPDATE_PERIOD);
     }
 
     @Override
@@ -91,6 +105,18 @@ public class MainActivity extends ActionBarActivity implements Callback {
     private void stopListening() {
         if (discoverer != null) {
             discoverer.stop();
+        }
+    }
+
+    private void updateState() {
+        if (discoverer != null) {
+            if (discoverer.isIdle()) {
+                stateTextView.setText(getString(R.string.idle));
+            } else if (discoverer.isBroadcasting()) {
+                stateTextView.setText(getString(R.string.broadcasting));
+            } else if (discoverer.isListening()){
+                stateTextView.setText(getString(R.string.listening));
+            }
         }
     }
 }
